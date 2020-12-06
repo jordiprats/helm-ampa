@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpsredirector-1.0
+  labels:
+    app: httpsredirector-1.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpsredirector-1.0
+  template:
+    metadata:
+      labels:
+        app: httpsredirector-1.0
+    spec:
+      containers:
+      - name: sillyhttpsredirector
+        image: "{{ .Values.images.sillyredirector.repository }}:{{ .Values.images.sillyredirector.tag | default .Chart.AppVersion }}"
+        resources:
+          requests:
+            memory: "50Mi"
+            cpu: "250m"
+          limits:
+            memory: "200Mi"
+            cpu: "500m"
+        ports:
+        - name: http
+          containerPort: 9000
