@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ampa-3.2
+  namespace: kube-system
+  labels:
+    app: ampa-3.2
+spec:
+  replicas: {{ .Values.app.replicaCount }}
+  selector:
+    matchLabels:
+      app: ampa-3.2
+  template:
+    metadata:
+      labels:
+        app: ampa-3.2
+    spec:
+      volumes:
+        - name: xls-data-ampa
+          persistentVolumeClaim:
+            claimName: nfs-ampa-pvc
+        - name: static-ampa
+          persistentVolumeClaim:
+            claimName: nfs-static-pvc
+      initContainers:
+      - name: ampa
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        command: ['sh', '-c', 'python /code/manage.py migrate']
+        env:
+        {{- range $key, $val := .Values.app }}
+          - name: {{ $key | upper }}
+            value: {{ $val | quote }}
+        {{- end }}
+        resources:
+          requests:
+            memory: "50Mi"
+            cpu: "250m"
+          limits:
+            memory: "200Mi"
+            cpu: "500m"
+      containers:
+      - name: ampa
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        env:
+        {{- range $key, $val := .Values.app.env }}
+          - name: {{ $key | upper }}
+            value: {{ $val | quote }}
+        {{- end }}
+        resources:
+          requests:
+            memory: "50Mi"
+            cpu: "250m"
+          limits:
+            memory: "200Mi"
+            cpu: "500m"
+        ports:
+        - name: http
+          containerPort: 8000
+        volumeMounts:
+          - mountPath: /code/xls
+            name: xls-data-ampa
+          - mountPath: /code/static
+            name: static-ampa
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 3
+      - name: ampa-processing
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        resources:
+          requests:
+            memory: "50Mi"
+            cpu: "250m"
+          limits:
+            memory: "200Mi"
+            cpu: "500m"
+        command: ["/code/processingtool.sh"]
+        volumeMounts:
+          - mountPath: /code/xls
+            name: xls-data-ampa
+          - mountPath: /code/static
+            name: static-ampa
