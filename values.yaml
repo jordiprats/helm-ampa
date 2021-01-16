@@ -27,6 +27,7 @@ app:
     db_host: '127.0.0.1'
 
     public_hostname: 'ampa.example.com'
+    static_hostname: 'static.example.com'
 
 # "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
 images:
