@@ -2,23 +2,39 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+export PUBLIC_HOSTNAME='ampa.systemadmin.es'
+export STATIC_HOSTNAME='static.ampa.systemadmin.es'
+
+export EMAIL_HOST='tachi.systemadmin.es'
+export EMAIL_HOST_USER='noreply@systemadmin.es'
+export EMAIL_HOST_PASSWORD='pserypor38pserypor38'
+export EMAIL_PORT="587"
+export EMAIL_USE_TLS="1"
+
+export AMPA_DEFAULT_FROM='Delegats Lestonnac <noreply@systemadmin.es>'
+
+static:
+  replicaCount: 1
+
 app:
-  name: ampa
-  domain: systemadmin.es
-  #fqdn:
+  replicaCount: 1
+  env:
+    secret_key: 'd41d8cd98f00b2048cd98f00b204e9800998ecf98f00b204e9800998ecf8427e'
+
+    db_name: 'ampa'
+    db_user: 'ampa'
+    db_password: 'sha1'
+    db_host: '127.0.0.1'
+
+    public_hostname: 'ampa.example.com'
 
 # "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
 images:
   ampa:
-    repository: nginx
+    repository: ampa
   ampa-static:
     repository: nginx
     tag: alpine
-  sillyredirector:
-    repository: jprats/sillyhttpsredirector
-    tag: 1.0-armv7l
-
-
 
 imagePullSecrets: []
 nameOverride: ""
