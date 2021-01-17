@@ -1,0 +1,252 @@
+---
+# Source: ampa/templates/0204-app-svc.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: ampa
+  labels:
+    helm.sh/chart: ampa-0.1.0
+    app.kubernetes.io/name: ampa
+    app.kubernetes.io/instance: ampa
+    app.kubernetes.io/version: "3.3"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    app.kubernetes.io/name: ampa
+    app.kubernetes.io/instance: ampa
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+---
+# Source: ampa/templates/0207-static-svc.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: ampa-static
+  labels:
+    helm.sh/chart: ampa-0.1.0-static
+    app.kubernetes.io/name: ampa
+    app.kubernetes.io/instance: ampa
+    app.kubernetes.io/version: "3.3"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+      app.kubernetes.io/name: ampa-static
+      app.kubernetes.io/instance: ampa
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+---
+# Source: ampa/templates/0203-app.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ampa
+  labels:
+    helm.sh/chart: ampa-0.1.0
+    app.kubernetes.io/name: ampa
+    app.kubernetes.io/instance: ampa
+    app.kubernetes.io/version: "3.3"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ampa
+      app.kubernetes.io/instance: ampa
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ampa
+        app.kubernetes.io/instance: ampa
+    spec:
+      volumes:
+        - name: xls-data-ampa
+          persistentVolumeClaim:
+            claimName: nfs-ampa-pvc
+        - name: static-ampa
+          persistentVolumeClaim:
+            claimName: nfs-static-pvc
+      initContainers:
+      - name: migrate
+        image: "172.18.1.46:5000/ampa:3.3"
+        command: ['sh', '-c', 'python /code/manage.py migrate']
+        env:
+          - name: AMPA_DEFAULT_FROM
+            value: "Delegats Lestonnac <noreply@systemadmin.es>"
+          - name: DB_HOST
+            value: "172.18.1.223"
+          - name: DB_NAME
+            value: "ampa"
+          - name: DB_PASSWORD
+            value: "c44e8cefebc304244884ad335f2649a9"
+          - name: DB_USER
+            value: "ampa"
+          - name: EMAIL_HOST
+            value: "tachi.systemadmin.es"
+          - name: EMAIL_HOST_PASSWORD
+            value: "pserypor38pserypor38"
+          - name: EMAIL_HOST_USER
+            value: "noreply@systemadmin.es"
+          - name: EMAIL_PORT
+            value: "587"
+          - name: EMAIL_USE_TLS
+            value: "1"
+          - name: PUBLIC_HOSTNAME
+            value: "ampa.systemadmin.es"
+          - name: SECRET_KEY
+            value: "legjihr1vng4we3%l$ed+28e^^yd!lhr_i+bpboxt#8+ci-7br"
+          - name: STATIC_HOSTNAME
+            value: "static.ampa.systemadmin.es"
+        resources:
+          requests:
+            memory: "50Mi"
+            cpu: "250m"
+          limits:
+            memory: "200Mi"
+            cpu: "500m"
+      containers:
+      - name: ampa
+        image: "172.18.1.46:5000/ampa:3.3"
+        env:
+          - name: AMPA_DEFAULT_FROM
+            value: "Delegats Lestonnac <noreply@systemadmin.es>"
+          - name: DB_HOST
+            value: "172.18.1.223"
+          - name: DB_NAME
+            value: "ampa"
+          - name: DB_PASSWORD
+            value: "c44e8cefebc304244884ad335f2649a9"
+          - name: DB_USER
+            value: "ampa"
+          - name: EMAIL_HOST
+            value: "tachi.systemadmin.es"
+          - name: EMAIL_HOST_PASSWORD
+            value: "pserypor38pserypor38"
+          - name: EMAIL_HOST_USER
+            value: "noreply@systemadmin.es"
+          - name: EMAIL_PORT
+            value: "587"
+          - name: EMAIL_USE_TLS
+            value: "1"
+          - name: PUBLIC_HOSTNAME
+            value: "ampa.systemadmin.es"
+          - name: SECRET_KEY
+            value: "legjihr1vng4we3%l$ed+28e^^yd!lhr_i+bpboxt#8+ci-7br"
+          - name: STATIC_HOSTNAME
+            value: "static.ampa.systemadmin.es"
+        resources:
+          requests:
+            memory: "50Mi"
+            cpu: "250m"
+          limits:
+            memory: "200Mi"
+            cpu: "500m"
+        ports:
+        - name: http
+          containerPort: 8000
+        volumeMounts:
+          - mountPath: /code/xls
+            name: xls-data-ampa
+          - mountPath: /code/static
+            name: static-ampa
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 3
+      - name: ampa-processing
+        image: "172.18.1.46:5000/ampa:3.3"
+        command: [ "/bin/sh", "/code/processingtool.sh" ]
+        env:
+          - name: AMPA_DEFAULT_FROM
+            value: "Delegats Lestonnac <noreply@systemadmin.es>"
+          - name: DB_HOST
+            value: "172.18.1.223"
+          - name: DB_NAME
+            value: "ampa"
+          - name: DB_PASSWORD
+            value: "c44e8cefebc304244884ad335f2649a9"
+          - name: DB_USER
+            value: "ampa"
+          - name: EMAIL_HOST
+            value: "tachi.systemadmin.es"
+          - name: EMAIL_HOST_PASSWORD
+            value: "pserypor38pserypor38"
+          - name: EMAIL_HOST_USER
+            value: "noreply@systemadmin.es"
+          - name: EMAIL_PORT
+            value: "587"
+          - name: EMAIL_USE_TLS
+            value: "1"
+          - name: PUBLIC_HOSTNAME
+            value: "ampa.systemadmin.es"
+          - name: SECRET_KEY
+            value: "legjihr1vng4we3%l$ed+28e^^yd!lhr_i+bpboxt#8+ci-7br"
+          - name: STATIC_HOSTNAME
+            value: "static.ampa.systemadmin.es"
+        resources:
+          requests:
+            memory: "50Mi"
+            cpu: "250m"
+          limits:
+            memory: "200Mi"
+            cpu: "500m"
+        volumeMounts:
+          - mountPath: /code/xls
+            name: xls-data-ampa
+          - mountPath: /code/static
+            name: static-ampa
+---
+# Source: ampa/templates/0206-static.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ampa-static
+  labels:
+    helm.sh/chart: ampa-0.1.0-static
+    app.kubernetes.io/name: ampa
+    app.kubernetes.io/instance: ampa
+    app.kubernetes.io/version: "3.3"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ampa-static
+      app.kubernetes.io/instance: ampa
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ampa-static
+        app.kubernetes.io/instance: ampa
+    spec:
+      volumes:
+        - name: static-ampa
+          persistentVolumeClaim:
+            claimName: nfs-static-pvc
+      containers:
+      - name: ampa-static
+        image: "nginx:alpine"
+        resources:
+          requests:
+            memory: "50Mi"
+            cpu: "250m"
+          limits:
+            memory: "200Mi"
+            cpu: "500m"
+        ports:
+          - name: http
+            containerPort: 80
+        volumeMounts:
+          - mountPath: /usr/share/nginx/html
+            name: static-ampa
