@@ -1,19 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ampa-static-1.0
-  namespace: kube-system
+  name: {{ include "ampa.fullname" . }}-static
   labels:
-    app: ampa-static-1.0
+    {{- include "ampa-static.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.static.replicaCount }}
   selector:
     matchLabels:
-      app: ampa-static-1.0
+      {{- include "ampa-static.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: ampa-static-1.0
+        {{- include "ampa-static.selectorLabels" . | nindent 6 }}
     spec:
       volumes:
         - name: static-ampa
@@ -21,7 +20,7 @@ spec:
             claimName: nfs-static-pvc
       containers:
       - name: ampa-static
-        image: nginx:alpine
+        image: "{{ .Values.images.static.repository }}:{{ .Values.images.static.tag | default "alpine" }}"
         resources:
           requests:
             memory: "50Mi"

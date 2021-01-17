@@ -1,32 +1,42 @@
+{{ if .Values.ingress.enabled -}}
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: ingress-http
-  namespace: kube-system
+  labels:
+    {{- include "ampa.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   rules:
   - host: ampa.systemadmin.es
     http:
       paths:
       - backend:
-          serviceName: ampa-32-svc
+          serviceName: {{ include "ampa.fullname" . }}
           servicePort: 8000
   - host: static.ampa.systemadmin.es
     http:
       paths:
       - backend:
-          serviceName: ampa-static-10-svc
+          serviceName: {{ include "ampa.fullname" . }}-static
           servicePort: 80
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: ingress-https
-  namespace: kube-system
+  labels:
+    {{- include "ampa.labels" . | nindent 4 }}
   annotations:
     traefik.ingress.kubernetes.io/router.tls: "true"
     cert-manager.io/cluster-issuer: letsencrypt
+    {{- with .Values.ingress.annotations }}
+        {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   tls:
     - secretName: k3s-systemadmin
@@ -37,5 +47,6 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: ampa-32-svc
+          serviceName: {{ include "ampa.fullname" . }}
           servicePort: 8000
+{{ end -}}
