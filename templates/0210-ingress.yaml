@@ -3,7 +3,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: ingress-http
+  name: {{ include "ampa.fullname" . }}-http
   labels:
     {{- include "ampa.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
@@ -28,7 +28,7 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: ingress-https
+  name: {{ include "ampa.fullname" . }}-https
   labels:
     {{- include "ampa.labels" . | nindent 4 }}
   annotations:

@@ -26,7 +26,7 @@ spec:
           persistentVolumeClaim:
             claimName: nfs-static-pvc
       initContainers:
-      - name: ampa
+      - name: migrate
         image: "{{ .Values.images.ampa.repository }}:{{ .Values.images.ampa.tag | default .Chart.AppVersion }}"
         command: ['sh', '-c', 'python /code/manage.py migrate']
         env:
@@ -68,12 +68,18 @@ spec:
           httpGet:
             path: /health/liveness
             port: http
+            httpHeaders:
+            - name: Host
+              value: "{{ .Values.app.env.public_hostname }}"
           initialDelaySeconds: 10
           periodSeconds: 3
         readinessProbe:
           httpGet:
             path: /health/readiness
             port: http
+            httpHeaders:
+            - name: Host
+              value: "{{ .Values.app.env.public_hostname }}"
           initialDelaySeconds: 10
           periodSeconds: 3
       - name: ampa-processing

@@ -11,8 +11,12 @@ spec:
       {{- include "ampa-static.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
       labels:
-        {{- include "ampa-static.selectorLabels" . | nindent 6 }}
+        {{- include "ampa-static.selectorLabels" . | nindent 8 }}
     spec:
       volumes:
         - name: static-ampa
