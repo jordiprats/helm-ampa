@@ -1,11 +1,12 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: ampa-static-10-svc
-  namespace: kube-system
+  name: {{ include "ampa.fullname" . }}-static
+  labels:
+    {{- include "ampa-static.labels" . | nindent 4 }}
 spec:
   selector:
-    app: ampa-static-1.0
+    {{- include "ampa-static.selectorLabels" . | nindent 6 }}
   ports:
   - name: http
     port: 80

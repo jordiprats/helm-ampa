@@ -1,11 +1,12 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: ampa-32-svc
-  namespace: kube-system
+  name: {{ include "ampa.fullname" . }}
+  labels:
+    {{- include "ampa.labels" . | nindent 4 }}
 spec:
   selector:
-    app: ampa-3.2
+    {{- include "ampa.selectorLabels" . | nindent 4 }}
   ports:
   - name: http
     port: 8000

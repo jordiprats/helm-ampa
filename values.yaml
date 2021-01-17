@@ -2,17 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-export PUBLIC_HOSTNAME='ampa.systemadmin.es'
-export STATIC_HOSTNAME='static.ampa.systemadmin.es'
-
-export EMAIL_HOST='tachi.systemadmin.es'
-export EMAIL_HOST_USER='noreply@systemadmin.es'
-export EMAIL_HOST_PASSWORD='pserypor38pserypor38'
-export EMAIL_PORT="587"
-export EMAIL_USE_TLS="1"
-
-export AMPA_DEFAULT_FROM='Delegats Lestonnac <noreply@systemadmin.es>'
-
 static:
   replicaCount: 1
 
@@ -29,11 +18,19 @@ app:
     public_hostname: 'ampa.example.com'
     static_hostname: 'static.example.com'
 
+    email_host: 'localhost'
+    email_host_user: 'demo@example.com'
+    email_host_password: 'sha1'
+    email_port: "587"
+    email_use_tls: "1"
+
+    ampa_default_from: 'Demo <noreply@example.com>'
+
 # "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
 images:
   ampa:
     repository: ampa
-  ampa-static:
+  static:
     repository: nginx
     tag: alpine
 

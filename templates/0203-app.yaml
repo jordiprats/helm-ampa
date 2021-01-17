@@ -1,19 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ampa-3.2
-  namespace: kube-system
+  name: {{ include "ampa.fullname" . }}
   labels:
-    app: ampa-3.2
+    {{- include "ampa.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.app.replicaCount }}
   selector:
     matchLabels:
-      app: ampa-3.2
+      {{- include "ampa.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
       labels:
-        app: ampa-3.2
+        {{- include "ampa.selectorLabels" . | nindent 8 }}
     spec:
       volumes:
         - name: xls-data-ampa
@@ -24,10 +27,10 @@ spec:
             claimName: nfs-static-pvc
       initContainers:
       - name: ampa
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        image: "{{ .Values.images.ampa.repository }}:{{ .Values.images.ampa.tag | default .Chart.AppVersion }}"
         command: ['sh', '-c', 'python /code/manage.py migrate']
         env:
-        {{- range $key, $val := .Values.app }}
+        {{- range $key, $val := .Values.app.env }}
           - name: {{ $key | upper }}
             value: {{ $val | quote }}
         {{- end }}
@@ -40,7 +43,7 @@ spec:
             cpu: "500m"
       containers:
       - name: ampa
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        image: "{{ .Values.images.ampa.repository }}:{{ .Values.images.ampa.tag | default .Chart.AppVersion }}"
         env:
         {{- range $key, $val := .Values.app.env }}
           - name: {{ $key | upper }}
@@ -74,7 +77,13 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 3
       - name: ampa-processing
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        image: "{{ .Values.images.ampa.repository }}:{{ .Values.images.ampa.tag | default .Chart.AppVersion }}"
+        command: [ "/bin/sh", "/code/processingtool.sh" ]
+        env:
+        {{- range $key, $val := .Values.app.env }}
+          - name: {{ $key | upper }}
+            value: {{ $val | quote }}
+        {{- end }}
         resources:
           requests:
             memory: "50Mi"
@@ -82,7 +91,6 @@ spec:
           limits:
             memory: "200Mi"
             cpu: "500m"
-        command: ["/code/processingtool.sh"]
         volumeMounts:
           - mountPath: /code/xls
             name: xls-data-ampa
