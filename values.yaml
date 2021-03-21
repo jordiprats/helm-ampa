@@ -26,6 +26,8 @@ app:
 
     ampa_default_from: 'Demo <noreply@example.com>'
 
+    protocol: 'http'
+
 # "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
 images:
   ampa:
@@ -66,12 +68,9 @@ service:
 
 ingress:
   enabled: false
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    app: ampa.systemadmin.es
-    static: static.ampa.systemadmin.es
+  web_annotations: {}
+  static_annotations: {}
+  hosts: {}
   tls:
     enabled: true
     letsencrypt:

@@ -3,22 +3,21 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ include "ampa.fullname" . }}-http
+  name: {{ include "ampa.fullname" . }}-static
   labels:
     {{- include "ampa.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
+  {{- with .Values.ingress.static_annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  tls:
+    - secretName: k3s-systemadmin
+      hosts:
+        - {{ .Values.app.env.public_hostname }}
+        - {{ .Values.app.env.static_hostname }}
   rules:
-  - host: ampa.systemadmin.es
-    http:
-      paths:
-      - backend:
-          serviceName: {{ include "ampa.fullname" . }}
-          servicePort: 8000
-  - host: static.ampa.systemadmin.es
+  - host: {{ .Values.app.env.static_hostname }}
     http:
       paths:
       - backend:
@@ -28,22 +27,23 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ include "ampa.fullname" . }}-https
+  name: {{ include "ampa.fullname" . }}-web
   labels:
     {{- include "ampa.labels" . | nindent 4 }}
   annotations:
     traefik.ingress.kubernetes.io/router.tls: "true"
     cert-manager.io/cluster-issuer: letsencrypt
-    {{- with .Values.ingress.annotations }}
+    {{- with .Values.ingress.web_annotations }}
         {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
   tls:
     - secretName: k3s-systemadmin
       hosts:
-        - ampa.systemadmin.es
+        - {{ .Values.app.env.public_hostname }}
+        - {{ .Values.app.env.static_hostname }}
   rules:
-  - host: ampa.systemadmin.es
+  - host: {{ .Values.app.env.public_hostname }}
     http:
       paths:
       - backend:
