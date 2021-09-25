@@ -31,7 +31,7 @@ app:
 # "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
 images:
   ampa:
-    repository: ampa
+    repository: jordiprats/ampa
   static:
     repository: nginx
     tag: alpine
