@@ -3,4 +3,4 @@ name: ampa
 description: AMPA
 type: application
 version: 1.0.3
-appVersion: 3.65
+appVersion: "3.65"
