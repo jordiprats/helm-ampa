@@ -73,8 +73,8 @@ spec:
             httpHeaders:
             - name: Host
               value: "{{ .Values.app.env.public_hostname }}"
-          initialDelaySeconds: 10
-          periodSeconds: 3
+          initialDelaySeconds: 30
+          periodSeconds: 5
         readinessProbe:
           httpGet:
             path: /health/readiness
@@ -82,5 +82,5 @@ spec:
             httpHeaders:
             - name: Host
               value: "{{ .Values.app.env.public_hostname }}"
-          initialDelaySeconds: 10
-          periodSeconds: 3
+          initialDelaySeconds: 30
+          periodSeconds: 5
