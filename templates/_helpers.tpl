@@ -51,6 +51,15 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
+{{- define "ampa-processing.labels" -}}
+helm.sh/chart: {{ include "ampa.chart" . }}-processing
+{{ include "ampa.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
 {{/*
 Selector labels
 */}}
@@ -61,6 +70,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 
 {{- define "ampa-static.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "ampa.name" . }}-static
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{- define "ampa-processing.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "ampa.name" . }}-processing
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
