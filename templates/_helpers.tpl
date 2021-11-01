@@ -53,7 +53,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 
 {{- define "ampa-processing.labels" -}}
 helm.sh/chart: {{ include "ampa.chart" . }}-processing
-{{ include "ampa.selectorLabels" . }}
+{{ include "ampa-processing.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
