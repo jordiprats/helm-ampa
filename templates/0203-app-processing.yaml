@@ -3,12 +3,12 @@ kind: Deployment
 metadata:
   name: {{ include "ampa.fullname" . }}-processing
   labels:
-    {{- include "ampa.labels" . | nindent 4 }}
+    {{- include "ampa-processing.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.processing.replicaCount }}
   selector:
     matchLabels:
-      {{- include "ampa.selectorLabels" . | nindent 6 }}
+      {{- include "ampa-processing.selectorLabels" . | nindent 6 }}
   template:
     metadata:
     {{- with .Values.podAnnotations }}
@@ -16,7 +16,7 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       labels:
-        {{- include "ampa.selectorLabels" . | nindent 8 }}
+        {{- include "ampa-processing.selectorLabels" . | nindent 8 }}
     spec:
       volumes:
         - name: xls-data-ampa
