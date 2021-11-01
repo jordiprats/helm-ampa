@@ -25,22 +25,6 @@ spec:
         - name: static-ampa
           persistentVolumeClaim:
             claimName: nfs-static-pvc
-      initContainers:
-      - name: migrate
-        image: "{{ .Values.images.ampa.repository }}:{{ .Values.images.ampa.tag | default .Chart.AppVersion }}"
-        command: ['sh', '-c', 'python /code/manage.py migrate']
-        env:
-        {{- range $key, $val := .Values.app.env }}
-          - name: {{ $key | upper }}
-            value: {{ $val | quote }}
-        {{- end }}
-        resources:
-          requests:
-            memory: "50Mi"
-            cpu: "250m"
-          limits:
-            memory: "200Mi"
-            cpu: "500m"
       containers:
       - name: ampa-processing
         image: "{{ .Values.images.ampa.repository }}:{{ .Values.images.ampa.tag | default .Chart.AppVersion }}"
