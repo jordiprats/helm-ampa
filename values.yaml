@@ -5,6 +5,9 @@
 static:
   replicaCount: 1
 
+processing:
+  replicaCount: 1
+
 app:
   replicaCount: 1
   env:

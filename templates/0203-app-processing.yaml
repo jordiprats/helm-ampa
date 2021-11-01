@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "ampa.fullname" . }}
+  name: {{ include "ampa.fullname" . }}-processing
   labels:
     {{- include "ampa.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.app.replicaCount }}
+  replicas: {{ .Values.processing.replicaCount }}
   selector:
     matchLabels:
       {{- include "ampa.selectorLabels" . | nindent 6 }}
@@ -42,15 +42,14 @@ spec:
             memory: "200Mi"
             cpu: "500m"
       containers:
-      - name: ampa
+      - name: ampa-processing
         image: "{{ .Values.images.ampa.repository }}:{{ .Values.images.ampa.tag | default .Chart.AppVersion }}"
+        command: [ "/bin/sh", "/code/processingtool.sh" ]
         env:
         {{- range $key, $val := .Values.app.env }}
           - name: {{ $key | upper }}
             value: {{ $val | quote }}
         {{- end }}
-          - name: "AMPA_APP_VERSION"
-            value: "versió {{ default .Chart.AppVersion }}"
         resources:
           requests:
             memory: "50Mi"
@@ -58,29 +57,8 @@ spec:
           limits:
             memory: "200Mi"
             cpu: "500m"
-        ports:
-        - name: http
-          containerPort: 8000
         volumeMounts:
           - mountPath: /code/xls
             name: xls-data-ampa
           - mountPath: /code/static
             name: static-ampa
-        livenessProbe:
-          httpGet:
-            path: /health/liveness
-            port: http
-            httpHeaders:
-            - name: Host
-              value: "{{ .Values.app.env.public_hostname }}"
-          initialDelaySeconds: 10
-          periodSeconds: 3
-        readinessProbe:
-          httpGet:
-            path: /health/readiness
-            port: http
-            httpHeaders:
-            - name: Host
-              value: "{{ .Values.app.env.public_hostname }}"
-          initialDelaySeconds: 10
-          periodSeconds: 3
