@@ -34,6 +34,8 @@ spec:
           - name: {{ $key | upper }}
             value: {{ $val | quote }}
         {{- end }}
+          - name: "AMPA_APP_VERSION"
+            value: "versió {{ default .Chart.AppVersion }}"
         resources:
           requests:
             memory: "50Mi"
