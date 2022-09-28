@@ -75,6 +75,8 @@ spec:
               value: "{{ .Values.app.env.public_hostname }}"
           initialDelaySeconds: 30
           periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 5
         readinessProbe:
           httpGet:
             path: /health/readiness
@@ -84,3 +86,5 @@ spec:
               value: "{{ .Values.app.env.public_hostname }}"
           initialDelaySeconds: 30
           periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 5
